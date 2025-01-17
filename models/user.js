@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM('superAdmin', 'admin', 'user'),
         defaultValue: 'user',
       },
+      currentToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },      
     },
     {
       sequelize,

@@ -1,13 +1,25 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config(); 
+const { User } = require("../models"); 
+require("dotenv").config();
 
-module.exports = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+module.exports = async (req, res, next) => {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized: Token missing." });
+  }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: "Forbidden" });
-    req.user = user;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id);
+
+    if (!user || user.currentToken !== token) {
+      return res.status(403).json({ message: "Unauthorized: Invalid or expired session." });
+    }
+
+    req.user = { id: user.id, role: user.role };
     next();
-  });
+  } catch (err) {
+    res.status(403).json({ message: "Forbidden: Invalid token." });
+  }
 };
+

@@ -15,7 +15,21 @@ exports.login = async (email, password) => {
     id: user.id,
     role: user.role,
   }
-  const token = jwt.sign(payload,process.env.JWT_SECRET,{ expiresIn: "5d" });
+  const token = jwt.sign(payload,process.env.JWT_SECRET,{ expiresIn: "1h" });
+
+  await user.update({ currentToken: token });
 
   return { message: "Login successful", token };
 };
+
+exports.logout = async (userId) => {
+    const user = await User.findByPk(userId);
+  
+    if (!user) {
+      throw new Error("User not found");
+    }
+    await user.update({ currentToken: null });
+  
+    return { message: "Logged out successfully" };
+  };
+  

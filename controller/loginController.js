@@ -14,3 +14,15 @@ exports.login = async (req, res) => {
     return res.status(401).json({ message: error.message });
   }
 };
+
+
+exports.logout = async (req, res) => {
+    try {
+      const userId = req.user.id;
+  
+      const result = await loginService.logout(userId);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  };
